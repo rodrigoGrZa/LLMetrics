@@ -1,5 +1,5 @@
 import { Result } from "../types";
-import { delay } from "./utils";
+import { delay, applyPromptTemplate } from "./utils";
 
 interface RunParams {
   inputs: string[];
@@ -10,6 +10,7 @@ interface RunParams {
   apiKey: string;
   selectedModel: string;
   mode: "openai" | "lmstudio";
+  variables: Record<string, string[]>;
 }
 
 export async function processPrompts({
@@ -21,15 +22,16 @@ export async function processPrompts({
   apiKey,
   selectedModel,
   mode,
+  variables,
 }: RunParams): Promise<Result[]> {
   const allResults: Result[] = [];
 
   const callPrompt = async (input: string, promptTemplate: string): Promise<Result> => {
-    const prompt = promptTemplate.replace(/{{input}}/g, input);
+    const finalPrompt = applyPromptTemplate(promptTemplate, input, variables);
     const start = performance.now();
 
     const json = await window.electronAPI.callLLM({
-      prompt,
+      prompt: finalPrompt,
       selectedModel,
       mode,
       apiKey,
@@ -42,7 +44,7 @@ export async function processPrompts({
 
     return {
       input,
-      prompt,
+      prompt: finalPrompt,
       output,
       timeSeconds: Number(((end - start) / 1000).toFixed(2)),
       inputTokens: usage.prompt_tokens,
@@ -52,6 +54,7 @@ export async function processPrompts({
   };
 
   const runSequential = async () => {
+    console.log("Running in sequential mode");
     for (const input of inputs) {
       for (const prompt of prompts) {
         for (let i = 0; i < repeatCount; i++) {
