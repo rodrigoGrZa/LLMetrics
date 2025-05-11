@@ -18,6 +18,7 @@ function App() {
   const [selectedModel, setSelectedModel] = useState<string>('gpt-4');
   const [mode, setMode] = useState<'openai' | 'lmstudio'>('openai');
   const [results, setResults] = useState<Result[]>([]);
+  const [variables, setVariables] = useState<Record<string, string[]>>({});
 
   const handleRun = async () => {
     const res = await processPrompts({
@@ -28,7 +29,8 @@ function App() {
       delaySeconds,
       apiKey,
       selectedModel,
-      mode
+      mode,
+      variables
     });
     setResults(res);
     await window.electronAPI.saveJSON(res);
@@ -37,7 +39,12 @@ function App() {
   return (
     <div className="p-4 space-y-4 bg-zinc-950 min-h-screen text-white">
       <FileUpload onInputsLoaded={setInputs} />
-      <PromptEditor prompts={prompts} setPrompts={setPrompts} />
+      <PromptEditor
+        prompts={prompts}
+        setPrompts={setPrompts}
+        variables={variables}
+        setVariables={setVariables}
+      />
       <ModelSelector
         selectedModel={selectedModel}
         apiKey={apiKey}

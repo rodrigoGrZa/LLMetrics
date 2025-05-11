@@ -12,10 +12,9 @@ function createWindow() {
   });
 
   win.loadURL("http://localhost:5173");
-  win.webContents.openDevTools();
 
   ipcMain.handle("save-json", async (_, data) => {
-    const appDataPath = path.join(app.getPath("appData"), "PromptApp");
+    const appDataPath = path.join(app.getPath("appData"), "LLMetrics");
     if (!fs.existsSync(appDataPath)) fs.mkdirSync(appDataPath);
     const filePath = path.join(appDataPath, "results.json");
     fs.writeFileSync(filePath, JSON.stringify(data, null, 2));
@@ -23,7 +22,7 @@ function createWindow() {
   });
 
   ipcMain.handle("load-json", async () => {
-    const filePath = path.join(app.getPath("appData"), "PromptApp", "results.json");
+    const filePath = path.join(app.getPath("appData"), "LLMetrics", "results.json");
     if (fs.existsSync(filePath)) {
       return JSON.parse(fs.readFileSync(filePath, "utf8"));
     }
